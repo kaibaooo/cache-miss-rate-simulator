@@ -16,6 +16,7 @@ void showCacheBlockInfo(uint32_t);
 
 ifstream fin;
 stringstream ss;
+string tmp;
 bool DebugMode = false;
 
 char *trace_file_name;
@@ -30,7 +31,7 @@ vector<Set_> cache;
 
 int main(int argc, char *argv[]) {
 	// Init
-	string tmp;
+	
 	if (argc < 5) {
 		cout << "argv error" << endl;
 		return 0;
@@ -40,12 +41,18 @@ int main(int argc, char *argv[]) {
 	block_size = atoi(argv[3]);
 	set_degree = atoi(argv[4]);
 	DebugMode = atoi(argv[5]);
+	uint32_t cache_size_ = cache_size;
+	char pad = ' ';
+	if(cache_size >= 1024){
+		cache_size_ = cache_size/1024;
+		pad = 'K';
+	}
 	printf("Trace File : %s\n"
-	"Cache Size : %u\t"
+	"Cache Size : %u %cBytes\t"
 	"Block Size : %u\t"
 	"Set Degree : %u\n",
 	trace_file_name, 
-	cache_size, block_size, set_degree);
+	cache_size_, pad, block_size, set_degree);
 
 	generateCache();
 	fin.open(trace_file_name);
@@ -57,10 +64,6 @@ int main(int argc, char *argv[]) {
 		uint32_t addr = hexstr_to_uint(tmp);
 		uint32_t mem_block_num = addr / block_size;
 		uint32_t cache_block_num = mem_block_num % (cache_size / block_size / set_degree);
-		//cout << "addr : " << addr << endl;
-		//cout << "mem_block_num : " << mem_block_num << endl;
-		//cout << "cache_block_num : " << cache_block_num << endl;
-		//cout << "Operation at " << cache_block_num << endl;
 		updateCache(mem_block_num);
 		if(DebugMode)
 			showCacheBlockInfo(cache_block_num);
@@ -80,7 +83,7 @@ uint32_t hexstr_to_uint(string target) {
 
 void generateCache() {
 	uint32_t numSet = cache_size / block_size / set_degree;
-	for (int i = 0; i < numSet; i++) {
+	for (uint32_t i = 0; i < numSet; i++) {
 		cache.push_back(Set_(set_degree));
 	}
 }
@@ -88,7 +91,7 @@ void updateCache(uint32_t mem_block) {
 	uint32_t index = mem_block % (cache_size / block_size / set_degree);
 	uint32_t tag = mem_block / (cache_size / block_size / set_degree);
 	// Check same tag
-	for (int i = 0; i < set_degree; i++) {
+	for (uint32_t i = 0; i < set_degree; i++) {
 		if (cache[index].blocks[i].valid && cache[index].blocks[i].tag == tag) {
 			HitCount++;
 			//printf("Hit %u at set block %u\n", tag, i);
@@ -97,9 +100,9 @@ void updateCache(uint32_t mem_block) {
 		}
 	}
 	// Space availible and put new tag
-	for (int i = 0; i < set_degree; i++) {
+	for (uint32_t i = 0; i < set_degree; i++) {
 		if (!cache[index].blocks[i].valid) {
-			for (int j = 0; j < set_degree; j++) {
+			for (uint32_t j = 0; j < set_degree; j++) {
 				if (cache[index].blocks[j].lru) cache[index].blocks[j].lru++;
 			}
 			cache[index].blocks[i].valid = true;
@@ -110,7 +113,7 @@ void updateCache(uint32_t mem_block) {
 		}
 	}
 	// Replace by LRU
-	for (int i = 0; i < set_degree; i++) {
+	for (uint32_t i = 0; i < set_degree; i++) {
 		if (cache[index].blocks[i].lru == set_degree) {
 			cache[index].blocks[i].valid = true;
 			cache[index].blocks[i].tag = tag;
@@ -123,8 +126,8 @@ void updateCache(uint32_t mem_block) {
 
 void setNewlyLRU(uint32_t index, uint32_t first_idx) {
 	uint32_t targetLRU = cache[index].blocks[first_idx].lru;
-	// ¤p©ó³Ì·s§ó·sªºIndex ³£++ ¨ä¥L¤£°Ê
-	for (int i = 0; i < set_degree; i++) {
+	// ï¿½pï¿½ï¿½Ì·sï¿½ï¿½sï¿½ï¿½Index ï¿½ï¿½++ ï¿½ï¿½Lï¿½ï¿½ï¿½ï¿½
+	for (uint32_t i = 0; i < set_degree; i++) {
 		if (cache[index].blocks[i].lru < targetLRU) {
 			cache[index].blocks[i].lru++;
 		}
@@ -137,11 +140,11 @@ void setNewlyLRU(uint32_t index, uint32_t first_idx) {
 }
 
 void showCacheBlockInfo(uint32_t index) {
-	printf("================================================\n");
-	printf("                   Cache Block %2d                 \n", index);
-	printf("|Valid\t\tTag\t\tLRU\t\t|\n");
-	for (int i = 0; i < set_degree; i++) {
-		printf("|%u\t\t%u\t\t%u\t\t|\n", cache[index].blocks[i].valid, cache[index].blocks[i].tag, cache[index].blocks[i].lru);
+	printf("=================================================================\n");
+	printf("                          Cache Block %2d                        \n", index);
+	printf("|Addr\t\tValid\t\tTag\t\tLRU\t\t|\n");
+	for (uint32_t i = 0; i < set_degree; i++) {
+		printf("|%s\t\t%u\t\t%u\t\t%u\t\t|\n", tmp.c_str(), cache[index].blocks[i].valid, cache[index].blocks[i].tag, cache[index].blocks[i].lru);
 	}
-	printf("================================================\n");
+	printf("=================================================================\n");
 }
