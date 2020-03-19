@@ -7,6 +7,6 @@ all:
 	$(CC) $(CFLAGS) $(COMPILE) CacheBlock.cpp CacheBlock.h
 	$(CC) $(CFLAGS) $(COMPILE) Set_.cpp Set_.h
 	$(CC) $(CFLAGS) $(COMPILE) Source.cpp
-	$(CC) $(CFLAGS) $(LINK) Source.exe *.o
+	$(CC) $(CFLAGS) $(LINK) Source.out *.o
 clear:
 	rm -rf *.o *.gch
