@@ -142,9 +142,9 @@ void setNewlyLRU(uint32_t index, uint32_t first_idx) {
 void showCacheBlockInfo(uint32_t index) {
 	printf("=================================================================\n");
 	printf("                          Cache Block %2d                        \n", index);
-	printf("|Addr\t\tValid\t\tTag\t\tLRU\t\t|\n");
+	printf("|Valid\t\tTag\t\tLRU\t\t|\n");
 	for (uint32_t i = 0; i < set_degree; i++) {
-		printf("|%s\t\t%u\t\t%u\t\t%u\t\t|\n", tmp.c_str(), cache[index].blocks[i].valid, cache[index].blocks[i].tag, cache[index].blocks[i].lru);
+		printf("|%u\t\t%u\t\t%u\t\t|\n", cache[index].blocks[i].valid, cache[index].blocks[i].tag, cache[index].blocks[i].lru);
 	}
 	printf("=================================================================\n");
 }
