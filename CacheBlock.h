@@ -4,8 +4,6 @@ class CacheBlock
 {
 public:
 	CacheBlock();
-	void setTag(unsigned int);
-	void setValid(bool);
 	~CacheBlock();
 	unsigned int tag;
 	unsigned int lru;

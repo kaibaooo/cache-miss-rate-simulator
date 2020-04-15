@@ -8,13 +8,6 @@ CacheBlock::CacheBlock(){
 	valid = false;
 }
 
-void CacheBlock::setTag(unsigned int tag_){
-
-}
-
-void CacheBlock::setValid(bool v_){
-
-}
 
 
 CacheBlock::~CacheBlock(){

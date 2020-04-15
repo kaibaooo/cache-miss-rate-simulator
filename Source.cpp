@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <cmath>
 #include "Set_.h"
 
 using namespace std;
@@ -41,28 +42,22 @@ int main(int argc, char *argv[]) {
 	block_size = atoi(argv[3]);
 	set_degree = atoi(argv[4]);
 	DebugMode = atoi(argv[5]);
-	uint32_t cache_size_ = cache_size;
-	char pad = ' ';
-	if(cache_size >= 1024){
-		cache_size_ = cache_size/1024;
-		pad = 'K';
-	}
+	cache_size*=1024;
 	printf("Trace File : %s\n"
-	"Cache Size : %u %cBytes\t"
+	"Cache Size : %u Bytes\t"
 	"Block Size : %u\t"
 	"Set Degree : %u\n",
 	trace_file_name, 
-	cache_size_, pad, block_size, set_degree);
+	cache_size, block_size, set_degree);
 
 	generateCache();
 	fin.open(trace_file_name);
 	
-
 	while (getline(fin, tmp)) {
 		if (fin.eof()) break;
 		//cout << hexstr_to_uint(tmp) << endl;
 		uint32_t addr = hexstr_to_uint(tmp);
-		uint32_t mem_block_num = addr / block_size;
+		uint32_t mem_block_num = floor(addr / block_size);
 		uint32_t cache_block_num = mem_block_num % (cache_size / block_size / set_degree);
 		updateCache(mem_block_num);
 		if(DebugMode)
@@ -70,8 +65,10 @@ int main(int argc, char *argv[]) {
 		
 	}
 	printf("Total Cache Operation : %u\n", HitCount + MissCount);
-	printf("Hit : %u,\t Miss : %u\n", HitCount, MissCount);
-	printf("Miss Rate : %f\n", (float)MissCount / (float)(HitCount + MissCount));
+	printf("Hit : %u \t Miss : %u\n", HitCount, MissCount);
+	double rate = (double)MissCount / (double)(HitCount + MissCount);
+	printf("Miss Rate : %lf\n", rate);
+	// printf("C_size: %u \t b_size: %u \t way: %u Miss Rate: %lf \n", cache_size/1024, block_size, set_degree, rate);
 	return 0;
 }
 
